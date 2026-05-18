@@ -17,8 +17,11 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Clean Cache Build
+        run: flutter clean
+
       - name: Compile Application
-        run: flutter build web --release
+        run: flutter build web --release --no-tree-shake-icons
 
       - name: Push to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0

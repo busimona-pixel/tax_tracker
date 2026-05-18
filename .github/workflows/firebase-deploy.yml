@@ -21,7 +21,8 @@ jobs:
         run: flutter build web --release
         
       - name: Push to Firebase Hosting
-        uses: w9jds/firebase-action@v2
+        - name: Push to Firebase Hosting
+        uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting
         env:

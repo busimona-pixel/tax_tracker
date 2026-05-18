@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:csv/csv.dart';
 import 'dart:typed_data';
 
@@ -325,26 +325,36 @@ class LedgerScreen extends StatelessWidget {
     }
   }
 
-  void _exportToExcelCSV() {
-    if (expenses.isEmpty) return;
+ void _exportToExcelCSV(BuildContext context) async {
+    // 1. Convert your expenses to a clean CSV string
     List<List<dynamic>> rows = [
-      ["Date", "Supplier", "Category", "Amount (AUD)", "Entity", "Notes", "Receipt Link"]
+      ["Date", "Supplier", "Category", "Description", "Amount", "Entity"]
     ];
-    for (var e in expenses) {
+
+    for (var exp in expenses) {
       rows.add([
-        "${e.date.day}/${e.date.month}/${e.date.year}", e.supplier, e.category,
-        e.amount, e.entity, e.description, e.receiptUrl ?? "No Receipt"
+        exp.date.toIso8601String().split('T')[0],
+        exp.supplier,
+        exp.category,
+        exp.description,
+        exp.amount,
+        exp.entity
       ]);
     }
-    String csvData = const ListToCsvConverter().convert(rows);
-    final blob = html.Blob([csvData], 'text/csv;charset=utf-8');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.AnchorElement(href: url)
-      ..setAttribute("download", "Tax_Tracker_Export_${DateTime.now().year}.csv")
-      ..click();
-    html.Url.revokeObjectUrl(url);
-  }
 
+    String csvData =  ListToCsvConverter().convert(rows);
+
+    // 2. Pure, native Flutter Clipboard copy (Works flawlessly on both Web and Mobile!)
+    await Clipboard.setData(ClipboardData(text: csvData));
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('CSV copied to clipboard! Ready to paste into Excel.'),
+        backgroundColor: Colors.teal,
+      ),
+    );
+  } 
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -357,7 +367,7 @@ class LedgerScreen extends StatelessWidget {
               children: [
                 Text("Total Entries: ${expenses.length}", style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey)),
                 FilledButton.icon(
-                  onPressed: _exportToExcelCSV,
+                 onPressed: () => _exportToExcelCSV(context),
                   icon: const Icon(Icons.download, size: 18),
                   label: const Text("Export CSV"),
                   style: FilledButton.styleFrom(backgroundColor: Colors.teal),

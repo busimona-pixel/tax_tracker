@@ -205,7 +205,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Future<void> _takePhoto() async {
-    await SystemChannels.platform.invokeMethod('SystemSound.play', 'click'); 
+    
     final picker = ImagePicker();
     try {
       final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 50, preferredCameraDevice: CameraDevice.rear);

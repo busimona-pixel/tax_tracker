@@ -208,7 +208,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     
     final picker = ImagePicker();
     try {
-      final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 50, preferredCameraDevice: CameraDevice.rear);
+      final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
         setState(() => _receiptBytes = bytes);
